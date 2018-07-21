@@ -2,33 +2,29 @@
 
 import sys
 from collections import Counter
-
+import gc
 import numpy as np
 import tensorflow.contrib.keras as kr
-
+import jieba
+import pandas as pd
+import re
 if sys.version_info[0] > 2:
     is_py3 = True
 else:
-    reload(sys)
+    #reload(sys)
     sys.setdefaultencoding("utf-8")
     is_py3 = False
-
-
 def native_word(word, encoding='utf-8'):
     """如果在python2下面使用python3训练的模型，可考虑调用此函数转化一下字符编码"""
     if not is_py3:
         return word.encode(encoding)
     else:
         return word
-
-
 def native_content(content):
     if not is_py3:
         return content.decode('utf-8')
     else:
         return content
-
-
 def open_file(filename, mode='r'):
     """
     常用文件操作，可在python2和python3间切换.
@@ -38,39 +34,39 @@ def open_file(filename, mode='r'):
         return open(filename, mode, encoding='utf-8', errors='ignore')
     else:
         return open(filename, mode)
-
-
 def read_file(filename):
     """读取文件数据"""
     contents, labels = [], []
     with open_file(filename) as f:
         for line in f:
             try:
-                label, content = line.strip().split('\t')
+                content,label= line.strip().split('__label__')
                 if content:
-                    contents.append(list(native_content(content)))
+                    contents.append((native_content(content)))
                     labels.append(native_content(label))
             except:
                 pass
     return contents, labels
-
-
+def read_csv(filename):
+    df = pd.read_csv(filename,'r',encoding='utf-8',sep=',')
+    contents = df['content'].values.tolist()
+    labels = (df['label'].values.tolist())
+    return contents,labels
 def build_vocab(train_dir, vocab_dir, vocab_size=5000):
     """根据训练集构建词汇表，存储"""
     data_train, _ = read_file(train_dir)
-
+    # isChinese = re.compile(r'[\u4e00-\u9fa5]+$')
     all_data = []
     for content in data_train:
-        all_data.extend(content)
-
+        # s=list(filter(lambda x:isChinese.match(x),  list(jieba.cut(content))))
+        all_data.extend(content.split(' '))
+    print(len(all_data))
     counter = Counter(all_data)
     count_pairs = counter.most_common(vocab_size - 1)
     words, _ = list(zip(*count_pairs))
     # 添加一个 <PAD> 来将所有文本pad为同一长度
     words = ['<PAD>'] + list(words)
     open_file(vocab_dir, mode='w').write('\n'.join(words) + '\n')
-
-
 def read_vocab(vocab_dir):
     """读取词汇表"""
     # words = open_file(vocab_dir).read().strip().split('\n')
@@ -79,40 +75,61 @@ def read_vocab(vocab_dir):
         words = [native_content(_.strip()) for _ in fp.readlines()]
     word_to_id = dict(zip(words, range(len(words))))
     return words, word_to_id
-
-
+def read_vec(vocab_dir):
+    word2id={}
+    with open(vocab_dir,'r',encoding='utf-8') as f:
+        # for line in f.readlines():
+        #     word,vec=line.split(' ')[0],line.split(' ')[1:]
+        #     word2id[word]=vec
+        word2id={line.split(' ')[0]:line.split(' ')[1:] for line in f.readlines()}
+    return word2id
+def loadWord2Vec(filename):
+    vocab = []
+    embd = []
+    cnt = 0
+    fr = open(filename,'r')
+    line = fr.readline().decode('utf-8').strip()
+    #print line
+    word_dim = int(line.split(' ')[1])
+    vocab.append("unk")
+    embd.append([0]*word_dim)
+    for line in fr :
+        row = line.strip().split(' ')
+        vocab.append(row[0])
+        embd.append(row[1:])
+    print("loaded word2vec")
+    fr.close()
+    vocab_index={word:index for index,word in enumerate(vocab)}
+    return vocab,embd,vocab_index
+def word2vec(x):
+   # with open("cnews/newsblogbbs.vec", 'r',encoding='utf-8') as f:
+    pass
 def read_category():
     """读取分类目录，固定"""
-    categories = ['体育', '财经', '房产', '家居', '教育', '科技', '时尚', '时政', '游戏', '娱乐']
+    categories = ['服饰内衣', '图书', '汽车用品', '运动户外', '家装建材', '礼品箱包', '电脑、办公', '家具', '母婴', '鞋靴']
 
     categories = [native_content(x) for x in categories]
 
     cat_to_id = dict(zip(categories, range(len(categories))))
 
     return categories, cat_to_id
-
-
 def to_words(content, words):
     """将id表示的内容转换为文字"""
     return ''.join(words[x] for x in content)
-
-
-def process_file(filename, word_to_id, cat_to_id, max_length=600):
+def process_file(filename, word_to_id, cat_to_id, max_length=20):
     """将文件转换为id表示"""
     contents, labels = read_file(filename)
 
     data_id, label_id = [], []
-    for i in range(len(contents)):
+    for i in range(1,len(contents)):
         data_id.append([word_to_id[x] for x in contents[i] if x in word_to_id])
         label_id.append(cat_to_id[labels[i]])
-
+    print(label_id)
     # 使用keras提供的pad_sequences来将文本pad为固定长度
     x_pad = kr.preprocessing.sequence.pad_sequences(data_id, max_length)
     y_pad = kr.utils.to_categorical(label_id)  # 将标签转换为one-hot表示
-
+    gc.collect()
     return x_pad, y_pad
-
-
 def batch_iter(x, y, batch_size=64):
     """生成批次数据"""
     data_len = len(x)
@@ -126,3 +143,20 @@ def batch_iter(x, y, batch_size=64):
         start_id = i * batch_size
         end_id = min((i + 1) * batch_size, data_len)
         yield x_shuffle[start_id:end_id], y_shuffle[start_id:end_id]
+        
+if __name__ =='__main__':
+    read_vec('cnews/newsblogbbs.vec')
+    # filename='cnews/newsblogbbs.vec'
+    # res=['<PAD>']
+    # a=True
+    # with open(filename,'r',encoding='utf-8') as f:
+    #     for i in f:
+    #         if a:
+    #             a=False
+    #             continue
+    #         word=i.split(' ')[0]
+    #         res.append(word)
+    # print(len(res))
+    # with open('cnews/data.vocab.txt','w',encoding='utf-8') as fw:
+    #     for word in res:
+    #         fw.write(word+"\n")
