@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Text Classification with CNN and RNN
 
 使用神经网络进行中文文本分类
@@ -129,6 +128,7 @@ Test Loss:  0.065, Test Acc:  98.06%
 ![images](image/loss&acc.png)
 
 ### 参数数量
+
 ```python
 INPUT:   [20x300x1]   memory: 20*300  =6K       weight:0
 CONV2-1: [2x300x1]    memory: 2x300   =0.6K     weight=2*300=900
@@ -165,4 +165,3 @@ FC:      [1*128]      memory: 128               weight:768x128=98304
 =======
 # chinese_short_text_classification
 short_text_classification
->>>>>>> abe3d00de7acb218e586ea9962fb432131fa0c73
