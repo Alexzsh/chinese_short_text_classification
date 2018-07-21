@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Text Classification with CNN and RNN
 
 使用神经网络进行中文文本分类
@@ -161,3 +162,7 @@ FC:      [1*128]      memory: 128               weight:768x128=98304
 [9] [qingson's zhihu](https://zhuanlan.zhihu.com/p/25928551)  
 [10] [Implementing a CNN for Text Classification in TensorFlow](http://www.wildml.com/2015/12/implementing-a-cnn-for-text-classification-in-tensorflow/)  
 [11] [Character-level Convolutional Networks for Text Classification](https://arxiv.org/abs/1509.01626)
+=======
+# chinese_short_text_classification
+short_text_classification
+>>>>>>> abe3d00de7acb218e586ea9962fb432131fa0c73
