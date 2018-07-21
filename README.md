@@ -153,7 +153,7 @@ FC:      [1*128]      memory: 128               weight:768x128=98304
 ## reference
 
 
-Mikolov T, Chen K, Corrado G, et al. [Efficient estimation of word representations in vector space](https://arxiv.org/abs/1301.3781)  
+[1] Mikolov T, Chen K, Corrado G, et al. [Efficient estimation of word representations in vector space](https://arxiv.org/abs/1301.3781)  
 [2]	Kim Y. [Convolutional neural networks for sentence classification](https://arxiv.org/abs/1408.5882)  
 [3]	Lai S, Xu L, Liu K, et al. [Recurrent Convolutional Neural Networks for Text Classification](https://www.aaai.org/ocs/index.php/AAAI/AAAI15/paper/view/9745)
 [4]	Yang Z, Yang D, Dyer C, et al. [Hierarchical attention networks for document classification](http://www.aclweb.org/anthology/N16-1174)
