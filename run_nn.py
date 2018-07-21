@@ -1,4 +1,5 @@
-# coding: utf-8
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 
@@ -11,16 +12,16 @@ import numpy as np
 import tensorflow as tf
 from sklearn import metrics
 
-from rnn_model import TRNNConfig, TextRNN
-from data.cnews_loader import read_vocab, read_category, batch_iter, process_file, build_vocab
+from nn_model import TNNConfig, TextNN
+from data.cnews_loader_cnn import read_vocab, read_category, batch_iter, process_file, build_vocab
 
-base_dir = 'data/cnews'
-train_dir = os.path.join(base_dir, 'cnews.train.txt')
-test_dir = os.path.join(base_dir, 'cnews.test.txt')
-val_dir = os.path.join(base_dir, 'cnews.val.txt')
-vocab_dir = os.path.join(base_dir, 'cnews.vocab.txt')
+base_dir = 'data'
+train_dir = os.path.join(base_dir, 'train_data.csv')
+test_dir = os.path.join(base_dir, 'test_data.csv')
+val_dir = os.path.join(base_dir, 'test_data.csv')
+vocab_dir = os.path.join(base_dir, 'data.vocab.txt')
 
-save_dir = 'checkpoints/textrnn'
+save_dir = 'checkpoints'
 save_path = os.path.join(save_dir, 'best_validation')  # 最佳验证结果保存路径
 
 
@@ -59,7 +60,7 @@ def evaluate(sess, x_, y_):
 def train():
     print("Configuring TensorBoard and Saver...")
     # 配置 Tensorboard，重新训练时，请将tensorboard文件夹删除，不然图会覆盖
-    tensorboard_dir = 'tensorboard/textrnn'
+    tensorboard_dir = 'tensorboard'
     if not os.path.exists(tensorboard_dir):
         os.makedirs(tensorboard_dir)
 
@@ -77,6 +78,7 @@ def train():
     # 载入训练集与验证集
     start_time = time.time()
     x_train, y_train = process_file(train_dir, word_to_id, cat_to_id, config.seq_length)
+    print('\n','process is  ',x_train.shape,y_train.shape)
     x_val, y_val = process_file(val_dir, word_to_id, cat_to_id, config.seq_length)
     time_dif = get_time_dif(start_time)
     print("Time usage:", time_dif)
@@ -97,9 +99,10 @@ def train():
     for epoch in range(config.num_epochs):
         print('Epoch:', epoch + 1)
         batch_train = batch_iter(x_train, y_train, config.batch_size)
+        # print('batcg_size is ',len(batch_train))
         for x_batch, y_batch in batch_train:
             feed_dict = feed_data(x_batch, y_batch, config.dropout_keep_prob)
-
+            # print('feed dict is ',len(x_train),len(y_batch))
             if total_batch % config.save_per_batch == 0:
                 # 每多少轮次将训练结果写入tensorboard scalar
                 s = session.run(merged_summary, feed_dict=feed_dict)
@@ -109,7 +112,7 @@ def train():
                 # 每多少轮次输出在训练集和验证集上的性能
                 feed_dict[model.keep_prob] = 1.0
                 loss_train, acc_train = session.run([model.loss, model.acc], feed_dict=feed_dict)
-                loss_val, acc_val = evaluate(session, x_val, y_val)  # todo
+                loss_val, acc_val = evaluate(session, x_val, y_val)
 
                 if acc_val > best_acc_val:
                     # 保存最好结果
@@ -181,19 +184,18 @@ def test():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2 or sys.argv[1] not in ['train', 'test']:
-        raise ValueError("""usage: python run_rnn.py [train / test]""")
+    if len(sys.argv) != 3 or sys.argv[1] not in ['train', 'test'] or sys.argv[2] not in['cnn','rnn']:
+        raise ValueError("""usage: python run_cnn.py [train / test] [cnn / rnn]""")
 
-    print('Configuring RNN model...')
-    config = TRNNConfig()
+    print('Configuring %s model...' % sys.argv[2])
+    config = TNNConfig(sys.argv[2])
     if not os.path.exists(vocab_dir):  # 如果不存在词汇表，重建
         build_vocab(train_dir, vocab_dir, config.vocab_size)
-    categories, cat_to_id = read_category()
-    words, word_to_id = read_vocab(vocab_dir)
-    config.vocab_size = len(words)
-    model = TextRNN(config)
 
-    if sys.argv[1] == 'train':
-        train()
-    else:
-        test()
+    categories, cat_to_id = read_category()
+    words,word_to_id = read_vocab(vocab_dir)
+    model = TextNN(config)
+
+    train() if sys.argv[1] == 'train' else test()
+
+
