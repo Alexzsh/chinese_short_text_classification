@@ -9,7 +9,7 @@ class TNNConfig(object):
     """NN配置参数"""
     def __init__(self,nn):
         self.nn=nn
-    embedding_dim = 128  # 词向量维度
+    embedding_dim = 300  # 词向量维度
     seq_length = 40  # 序列长度
     num_classes = 10  # 类别数
     num_filters = 256  # 卷积核数目
