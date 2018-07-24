@@ -106,7 +106,7 @@ def word2vec(x):
     pass
 def read_category():
     """读取分类目录，固定"""
-    categories = ['服饰内衣', '图书', '汽车用品', '运动户外', '家装建材', '礼品箱包', '电脑、办公', '家具', '母婴', '鞋靴']
+    categories = ['服饰内衣', '图书', '汽车用品', '运动户外', '家装建材', '礼品箱包']
 
     categories = [native_content(x) for x in categories]
 

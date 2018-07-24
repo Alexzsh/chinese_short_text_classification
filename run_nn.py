@@ -13,12 +13,12 @@ import tensorflow as tf
 from sklearn import metrics
 
 from nn_model import TNNConfig, TextNN
-from data.cnews_loader_cnn import read_vocab, read_category, batch_iter, process_file, build_vocab
+from data.pre_process import read_vocab, read_category, batch_iter, process_file, build_vocab
 
 base_dir = 'data'
-train_dir = os.path.join(base_dir, 'train_data.csv')
-test_dir = os.path.join(base_dir, 'test_data.csv')
-val_dir = os.path.join(base_dir, 'test_data.csv')
+train_dir = os.path.join(base_dir, 'fasttext.cut.train.txt')
+test_dir = os.path.join(base_dir, 'fasttext.cut.test.txt')
+val_dir = os.path.join(base_dir, 'fasttext.cut.val.txt')
 vocab_dir = os.path.join(base_dir, 'data.vocab.txt')
 
 save_dir = 'checkpoints'

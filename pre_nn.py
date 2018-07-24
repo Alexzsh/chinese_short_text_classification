@@ -8,17 +8,17 @@ import tensorflow as tf
 import tensorflow.contrib.keras as kr
 
 from nn_model import TNNConfig, TextNN
-from data.cnews_loader import read_category, read_vocab
+from data.pre_process import read_category, read_vocab
 
 try:
     bool(type(unicode))
 except NameError:
     unicode = str
 
-base_dir = 'data'
+base_dir = 'data/'
 vocab_dir = os.path.join(base_dir, 'data.vocab.txt')
 
-save_dir = 'checkpoints'
+save_dir = 'checkpoints/textnn'
 save_path = os.path.join(save_dir, 'best_validation')  # 最佳验证结果保存路径
 
 
