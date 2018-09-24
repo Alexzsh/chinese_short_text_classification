@@ -167,4 +167,5 @@ class TextNN(object):
             correct_pred = tf.equal(tf.argmax(self.input_y, 1), self.y_pred_cls)
             self.acc = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
     def bigru_att():
+        #todo
         pass
